@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "users": {
+      "title": "Users",
+      "description": "User account profiles",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "profiles": {
+      "title": "Student Profiles",
+      "description": "Academic and skill profile of university students",
+      "properties": {
+        "userId": { "type": "string" },
+        "major": { "type": "string" },
+        "university": { "type": "string" },
+        "gradYear": { "type": "string" },
+        "gpa": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "interests": { "type": "array", "items": { "type": "string" } },
+        "projects": { "type": "array", "items": { "type": "object" } },
+        "certifications": { "type": "array", "items": { "type": "string" } },
+        "careerGoals": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId"]
+    },
+    "roadmaps": {
+      "title": "Career Roadmaps",
+      "description": "Generated milestone roadmaps for target careers",
+      "properties": {
+        "userId": { "type": "string" },
+        "roleTitle": { "type": "string" },
+        "overview": { "type": "string" },
+        "milestones": { "type": "array", "items": { "type": "object" } },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "roleTitle"]
+    },
+    "savedCareers": {
+      "title": "Saved Careers",
+      "description": "Bookmarked career paths for a student",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "matchScore": { "type": "number" },
+        "salary": { "type": "string" },
+        "growth": { "type": "string" },
+        "skillsGap": { "type": "array", "items": { "type": "string" } },
+        "reasoning": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "title"]
+    }
+  }
+}

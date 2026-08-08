@@ -1,0 +1,6 @@
+{
+  "name": "CareerCompass AI",
+  "description": "AI-powered career discovery and roadmap generator for university students",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
