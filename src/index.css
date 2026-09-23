@@ -1,1 +1,268 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ==========================================================================
+   CAREERCOMPASS AI — MONOCHROME-FIRST AI PLATFORM DESIGN SYSTEM
+   Inspired by Linear, Notion, Stripe & Modern AI Productivity Platforms
+   ========================================================================== */
+
+:root {
+  /* Canvas & Elevated Dark Charcoal Surfaces */
+  --background: #0B0D14;
+  --background-secondary: #0F121C;
+  --surface: #141724;
+  --surface-elevated: #191E2E;
+  --surface-hover: #1E2336;
+  
+  /* Text Contrast Hierarchy (Off-White & Refined Muted Slates) */
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #64748B;
+  
+  /* Borders & Subtle Dividers */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-focus: #6366F1;
+  
+  /* Signature Brand Action: Restrained Electric Indigo */
+  --primary: #6366F1;
+  --primary-hover: #4F46E5;
+  --primary-text: #FFFFFF;
+  --primary-glow: rgba(99, 102, 241, 0.25);
+  
+  /* Secondary Charcoal Action */
+  --secondary: #1E2336;
+  --secondary-hover: #262D44;
+  --secondary-text: #F8FAFC;
+  
+  /* Subtle Accent Tones */
+  --accent: #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-text: #FFFFFF;
+  --accent-glow: rgba(99, 102, 241, 0.20);
+  
+  /* Badges & Tags */
+  --badge-bg: rgba(255, 255, 255, 0.06);
+  --badge-text: #E2E8F0;
+  --badge-border: rgba(255, 255, 255, 0.10);
+  
+  /* Card Styling & Ambient Glow */
+  --card-bg: #131724;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.40), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  
+  /* Inputs */
+  --input-bg: #0F121C;
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-text: #F8FAFC;
+  
+  /* Buttons */
+  --button-bg: #6366F1;
+  --button-text: #FFFFFF;
+  --button-hover-bg: #4F46E5;
+  
+  /* Navigation */
+  --navbar-bg: rgba(11, 13, 20, 0.85);
+  --navbar-border: rgba(255, 255, 255, 0.08);
+  --nav-active-bg: rgba(99, 102, 241, 0.15);
+  --nav-active-text: #818CF8;
+  --nav-inactive-text: #94A3B8;
+  --nav-container-bg: #0F121C;
+  --nav-container-border: rgba(255, 255, 255, 0.08);
+  
+  /* Semantics */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  
+  /* Charts Palette (Linear Dark Monochromatic with Indigo & Teal Highlights) */
+  --chart-1: #6366F1;
+  --chart-2: #38BDF8;
+  --chart-3: #10B981;
+  --chart-4: #F59E0B;
+  --chart-5: #A855F7;
+  
+  /* Typography & Geometric Dimensions */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-card: 0.875rem;
+  --radius-btn: 0.5rem;
+  --radius-input: 0.5rem;
+  --border-width: 1px;
+}
+
+/* Global Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 120ms;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--background);
+  color: var(--text-primary);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings Typography Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   MINIMALIST COMPONENT UTILITIES
+   ========================================================================== */
+
+.bg-theme-main {
+  background-color: var(--background) !important;
+}
+
+.bg-theme-secondary {
+  background-color: var(--background-secondary) !important;
+}
+
+.bg-theme-surface {
+  background-color: var(--surface) !important;
+}
+
+.bg-theme-surface-elevated {
+  background-color: var(--surface-elevated) !important;
+}
+
+.text-theme-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-theme-muted {
+  color: var(--text-muted) !important;
+}
+
+.border-theme {
+  border-color: var(--border) !important;
+}
+
+.border-theme-subtle {
+  border-color: var(--border-subtle) !important;
+}
+
+.card-theme {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--radius-card);
+}
+
+.btn-theme-primary {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  transition: all 120ms ease;
+}
+
+.btn-theme-primary:hover {
+  background-color: var(--button-hover-bg);
+  box-shadow: 0 0 16px var(--primary-glow);
+}
+
+.btn-theme-secondary {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  transition: all 120ms ease;
+}
+
+.btn-theme-secondary:hover {
+  background-color: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.badge-theme {
+  background-color: var(--badge-bg);
+  color: var(--badge-text);
+  border: 1px solid var(--badge-border);
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.input-theme {
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--input-text);
+  border-radius: var(--radius-input);
+}
+
+.input-theme:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+/* Normalization for inputs */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--input-text);
+  border-radius: var(--radius-input);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--border-focus);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748B !important;
+  opacity: 1;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--primary);
+}
+
+/* Custom Scrollbar for Linear / Dark UI feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}

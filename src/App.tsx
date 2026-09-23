@@ -13,7 +13,8 @@ import {
   getDocs, 
   addDoc, 
   deleteDoc, 
-  FirebaseUser 
+  FirebaseUser,
+  getUserAuthRole
 } from './lib/firebase';
 import { 
   StudentProfile, 
@@ -24,28 +25,85 @@ import {
   AnswerEvaluation, 
   ChatMessage, 
   SavedCareerItem,
-  SkillGapAnalysisResult
+  SkillGapAnalysisResult,
+  UserAuthRole
 } from './types';
-import { sampleProfiles } from './data/sampleProfiles';
+import { fetchWithAuth } from './lib/api';
 import { Navbar } from './components/Navbar';
 import { AuthModal } from './components/AuthModal';
 import { ProfileBuilder } from './components/ProfileBuilder';
 import { CareerRecommendations } from './components/CareerRecommendations';
+import { CareerAssessment } from './components/CareerAssessment';
+import { CareerExplorer } from './components/CareerExplorer';
 import { RoadmapView } from './components/RoadmapView';
 import { ResumeAnalyzer } from './components/ResumeAnalyzer';
 import { InterviewPrep } from './components/InterviewPrep';
+import { SkillGapAnalysis } from './components/SkillGapAnalysis';
+import { JobMarketDashboard } from './components/JobMarketDashboard';
+import { ScenarioSimulator } from './components/ScenarioSimulator';
 import { AdvisorChat } from './components/AdvisorChat';
 import { SavedCareersView } from './components/SavedCareersView';
-import { SkillGapAnalysis } from './components/SkillGapAnalysis';
-import { CareerExplorer } from './components/CareerExplorer';
-import { JobMarketDashboard } from './components/JobMarketDashboard';
 import { FacultyDashboard } from './components/FacultyDashboard';
+import { ProfileView } from './components/ProfileView';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { AmbientThemeBackground } from './components/AmbientThemeBackground';
+import { ThemeSelectorModal } from './components/ThemeSelectorModal';
+import { ProfileExperienceModal } from './components/ProfileExperienceModal';
+import { SettingsModal } from './components/SettingsModal';
+import { AppThemeId, ProfileExperienceId } from './themes/types';
+import { INITIAL_CAREER_RECOMMENDATIONS } from './data/defaultRecommendations';
+import { Sparkles, MessageSquare, X } from 'lucide-react';
 
-export default function App() {
+function AppContent() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isProfileEditorModalOpen, setIsProfileEditorModalOpen] = useState(false);
+
+  // Active navigation tab
   const [activeTab, setActiveTab] = useState('discover');
+  const [navigationHistory, setNavigationHistory] = useState<string[]>(['discover']);
+
+  const navigateTo = (tab: string) => {
+    if (tab === activeTab) return;
+    setNavigationHistory(prev => {
+      if (prev[prev.length - 1] === tab) return prev;
+      return [...prev, tab];
+    });
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goBack = () => {
+    setNavigationHistory(prev => {
+      if (prev.length > 1) {
+        const nextHist = [...prev];
+        nextHist.pop();
+        const prevTab = nextHist[nextHist.length - 1] || 'discover';
+        setActiveTab(prevTab);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return nextHist;
+      } else {
+        setActiveTab('discover');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return ['discover'];
+      }
+    });
+  };
+
+  const { 
+    appThemeId,
+    profileExperienceId,
+    isDarkMode, 
+    setIsDarkMode, 
+    isAppThemeModalOpen, 
+    openAppThemeModal, 
+    closeAppThemeModal,
+    isProfileExperienceModalOpen,
+    openProfileExperienceModal,
+    closeProfileExperienceModal,
+    syncFromProfile 
+  } = useTheme();
 
   // Initial Student Profile
   const [profile, setProfile] = useState<StudentProfile>({
@@ -54,6 +112,7 @@ export default function App() {
     major: 'Computer Science',
     gradYear: '2026',
     gpa: '3.8',
+    dreamRole: 'AI / Machine Learning Engineer',
     skills: ['Python', 'TypeScript', 'React', 'Node.js', 'SQL', 'Git', 'Data Structures'],
     interests: ['Artificial Intelligence', 'Full-Stack Development', 'Cloud Computing', 'Tech Startups'],
     certifications: ['AWS Certified Developer Associate'],
@@ -67,11 +126,14 @@ export default function App() {
     ],
     workPreference: 'Hybrid',
     targetIndustries: ['Technology', 'AI & Machine Learning'],
-    careerGoals: 'Land a Software Engineer or AI Systems Developer role at a top technology company or high-growth startup after graduation.'
+    careerGoals: 'Land a Software Engineer or AI Systems Developer role at a top technology company or high-growth startup after graduation.',
+    appTheme: 'professional',
+    profileExperience: 'professional',
+    experienceTheme: 'professional'
   });
 
   // App Data States
-  const [recommendations, setRecommendations] = useState<CareerRecommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<CareerRecommendation[]>(INITIAL_CAREER_RECOMMENDATIONS);
   const [roadmap, setRoadmap] = useState<CareerRoadmap | null>(null);
   const [resumeAnalysis, setResumeAnalysis] = useState<ResumeAnalysisResult | null>(null);
   const [interviewQuestions, setInterviewQuestions] = useState<InterviewQuestion[]>([]);
@@ -92,7 +154,7 @@ export default function App() {
       {
         id: 'm0',
         sender: 'ai',
-        text: "Hello! I'm Compass AI, your personal AI Career Mentor. Ask me: 'Which career suits me?', 'How to get into Google?', 'Should I learn AWS?', 'Explain DSA.', or 'Review my roadmap.'!",
+        text: "Hello! I'm CareerCompass AI. Ask me anything about your career path, resume bullets, or next steps!",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ];
@@ -109,6 +171,15 @@ export default function App() {
   const [isAnalyzingSkillGap, setIsAnalyzingSkillGap] = useState(false);
   const [isChatThinking, setIsChatThinking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [userRole, setUserRole] = useState<UserAuthRole | null>(null);
+
+  // Refresh user role custom claims or directory status
+  const refreshUserRole = async () => {
+    if (user) {
+      const updated = await getUserAuthRole(user, true);
+      setUserRole(updated);
+    }
+  };
 
   // Listen for Auth changes
   useEffect(() => {
@@ -116,8 +187,19 @@ export default function App() {
       setUser(currentUser);
       if (currentUser) {
         setProfile(prev => ({ ...prev, userId: currentUser.uid }));
-        // Load user data from Firestore
         loadUserDataFromFirestore(currentUser.uid);
+        const resolvedRole = await getUserAuthRole(currentUser);
+        setUserRole(resolvedRole);
+      } else {
+        setUserRole({
+          uid: 'guest',
+          email: null,
+          role: 'student',
+          isFaculty: false,
+          isAdmin: false,
+          emailVerified: false,
+          customClaimsSource: 'guest_student'
+        });
       }
     });
     return () => unsubscribe();
@@ -128,18 +210,19 @@ export default function App() {
   // Fetch Firestore Data for Authenticated User
   const loadUserDataFromFirestore = async (uid: string) => {
     try {
-      // 1. Fetch Profile
+      // 1. Profile
       const profileRef = doc(db, 'profiles', uid);
       const profileSnap = await getDoc(profileRef);
       if (profileSnap.exists()) {
-        setProfile(profileSnap.data() as StudentProfile);
+        const profileData = profileSnap.data() as StudentProfile;
+        setProfile(profileData);
+        syncFromProfile(profileData.appTheme, profileData.profileExperience, profileData.experienceTheme);
         setShowProfileBanner(false);
       } else {
-        // First login! Prompt profile creation
         setShowProfileBanner(true);
       }
 
-      // 2. Fetch Saved Careers
+      // 2. Saved Careers
       const careersQ = query(collection(db, 'savedCareers'), where('userId', '==', uid));
       const careersSnap = await getDocs(careersQ);
       const fetchedCareers: SavedCareerItem[] = [];
@@ -148,7 +231,7 @@ export default function App() {
       });
       setSavedCareers(fetchedCareers);
 
-      // 3. Fetch Saved Roadmaps
+      // 3. Saved Roadmaps
       const roadmapsQ = query(collection(db, 'roadmaps'), where('userId', '==', uid));
       const roadmapsSnap = await getDocs(roadmapsQ);
       const fetchedRoadmaps: CareerRoadmap[] = [];
@@ -157,7 +240,7 @@ export default function App() {
       });
       setSavedRoadmaps(fetchedRoadmaps);
 
-      // 4. Fetch Saved Chat History
+      // 4. Chat History
       const chatRef = doc(db, 'chatHistory', uid);
       const chatSnap = await getDoc(chatRef);
       if (chatSnap.exists()) {
@@ -172,13 +255,46 @@ export default function App() {
     }
   };
 
+  // Sync App Theme change to Firestore
+  const handleAppThemeSavedToProfile = async (newAppTheme: AppThemeId) => {
+    setProfile(prev => ({ ...prev, appTheme: newAppTheme }));
+    if (user) {
+      try {
+        await setDoc(doc(db, 'profiles', user.uid), {
+          appTheme: newAppTheme
+        }, { merge: true });
+      } catch (e) {
+        console.warn('Failed to sync app theme preference to Firestore:', e);
+      }
+    }
+  };
+
+  // Sync Profile Experience change to Firestore
+  const handleProfileExperienceSavedToProfile = async (newProfileExp: ProfileExperienceId) => {
+    setProfile(prev => ({ 
+      ...prev, 
+      profileExperience: newProfileExp,
+      experienceTheme: newProfileExp 
+    }));
+    if (user) {
+      try {
+        await setDoc(doc(db, 'profiles', user.uid), {
+          profileExperience: newProfileExp,
+          experienceTheme: newProfileExp
+        }, { merge: true });
+      } catch (e) {
+        console.warn('Failed to sync profile experience to Firestore:', e);
+      }
+    }
+  };
+
   // Initial Auto-Generate Recommendations on mount
   useEffect(() => {
     if (recommendations.length === 0) {
       handleGenerateRecommendations();
     }
     if (!skillGapAnalysis) {
-      handleAnalyzeSkillGap(profile.dreamRole || 'Full-Stack Software Engineer');
+      handleAnalyzeSkillGap(profile.dreamRole || 'AI / Machine Learning Engineer');
     }
   }, []);
 
@@ -186,9 +302,8 @@ export default function App() {
   const handleGenerateRecommendations = async () => {
     try {
       setIsGeneratingRecs(true);
-      const res = await fetch('/api/recommendations', {
+      const res = await fetchWithAuth('/api/recommendations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile)
       });
       const data = await res.json();
@@ -202,13 +317,12 @@ export default function App() {
     }
   };
 
-  // Skill Gap Analysis Handler
+  // 2. Skill Gap Analysis
   const handleAnalyzeSkillGap = async (targetRole: string) => {
     try {
       setIsAnalyzingSkillGap(true);
-      const res = await fetch('/api/skill-gap', {
+      const res = await fetchWithAuth('/api/skill-gap', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetRole, profile })
       });
       const data = await res.json();
@@ -220,14 +334,13 @@ export default function App() {
     }
   };
 
-  // 2. Generate Career Roadmap for Target Role
+  // 3. Generate Career Roadmap
   const handleGenerateRoadmap = async (roleTitle: string) => {
     try {
       setIsGeneratingRoadmap(true);
-      setActiveTab('roadmap');
-      const res = await fetch('/api/roadmap', {
+      navigateTo('roadmap');
+      const res = await fetchWithAuth('/api/roadmap', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profile, targetRole: roleTitle })
       });
       const data = await res.json();
@@ -239,13 +352,12 @@ export default function App() {
     }
   };
 
-  // 3. Analyze Resume
+  // 4. Analyze Resume
   const handleAnalyzeResume = async (resumeText: string, targetRole: string, pdfBase64?: string) => {
     try {
       setIsAnalyzingResume(true);
-      const res = await fetch('/api/resume-analyzer', {
+      const res = await fetchWithAuth('/api/resume-analyzer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resumeText, targetRole, pdfBase64 })
       });
       const data = await res.json();
@@ -257,19 +369,18 @@ export default function App() {
     }
   };
 
-  // 4. Generate Interview Questions
-  const handleGenerateInterview = async (roleTitle: string) => {
+  // 5. Generate Interview Questions
+  const handleGenerateInterview = async (roleTitle: string, roundType: string = 'Full-Round') => {
     try {
       setIsGeneratingInterview(true);
-      setTargetInterviewRole(roleTitle);
-      const res = await fetch('/api/interview-prep', {
+      const res = await fetchWithAuth('/api/interview/questions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetRole: roleTitle })
+        body: JSON.stringify({ roleTitle, roundType })
       });
       const data = await res.json();
       if (data.questions) {
         setInterviewQuestions(data.questions);
+        setInterviewEvaluation(null);
       }
     } catch (err) {
       console.error('Error generating interview questions:', err);
@@ -278,63 +389,61 @@ export default function App() {
     }
   };
 
-  // 5. Evaluate Interview Answer
-  const handleEvaluateAnswer = async (question: string, userAnswer: string, roleTitle: string, category?: string) => {
+  // 6. Evaluate Interview Answer
+  const handleEvaluateAnswer = async (question: any, answer: string, role?: string, category?: string) => {
     try {
       setIsEvaluatingInterview(true);
-      const res = await fetch('/api/evaluate-interview-answer', {
+      const questionText = typeof question === 'object' ? question?.question : question;
+      const questionCategory = category || (typeof question === 'object' ? question?.category : 'Technical');
+      const res = await fetchWithAuth('/api/interview/evaluate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, userAnswer, targetRole: roleTitle, category })
+        body: JSON.stringify({ 
+          question: questionText, 
+          userAnswer: answer,
+          answer, 
+          targetRole: role || targetInterviewRole || 'Software Engineer',
+          category: questionCategory
+        })
       });
       const data = await res.json();
       setInterviewEvaluation(data);
     } catch (err) {
-      console.error('Error evaluating answer:', err);
+      console.error('Error evaluating interview answer:', err);
     } finally {
       setIsEvaluatingInterview(false);
     }
   };
 
-  // 6. Chat with AI Mentor (with persistence)
-  const handleSendMessage = async (text: string) => {
+  // 7. Advisor Chat
+  const handleSendMessage = async (userText: string) => {
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
-      text,
+      text: userText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-
-    const newHistory = [...chatMessages, userMsg];
-    setChatMessages(newHistory);
-    try {
-      localStorage.setItem('careercompass_chat_messages', JSON.stringify(newHistory));
-    } catch (e) {
-      console.error('Failed to save chat to localStorage:', e);
-    }
+    const updatedMessages = [...chatMessages, userMsg];
+    setChatMessages(updatedMessages);
     setIsChatThinking(true);
 
     try {
-      const res = await fetch('/api/chat-advisor', {
+      const res = await fetchWithAuth('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: newHistory,
+          message: userText,
+          history: updatedMessages,
           profile,
-          roadmap,
-          skillGap: skillGapAnalysis
+          roadmap
         })
       });
       const data = await res.json();
-
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
-        text: data.reply || "I'm here to help guide your career path!",
+        text: data.reply || "I'm here to help navigate your university career journey!",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-
-      const updatedHistory = [...newHistory, aiMsg];
+      const updatedHistory = [...updatedMessages, aiMsg];
       setChatMessages(updatedHistory);
       try {
         localStorage.setItem('careercompass_chat_messages', JSON.stringify(updatedHistory));
@@ -342,7 +451,6 @@ export default function App() {
         console.error('Failed to save chat to localStorage:', e);
       }
 
-      // Persist to Firestore if user is logged in
       if (user) {
         try {
           await setDoc(doc(db, 'chatHistory', user.uid), {
@@ -361,12 +469,11 @@ export default function App() {
     }
   };
 
-  // Clear Chat History
   const handleClearChatHistory = async () => {
     const initialMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'ai',
-      text: "Hello! I'm Compass AI, your personal AI Career Mentor. Ask me: 'Which career suits me?', 'How to get into Google?', 'Should I learn AWS?', 'Explain DSA.', or 'Review my roadmap.'!",
+      text: "Hello! I'm CareerCompass AI. Ask me anything about your career path, resume bullets, or next steps!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setChatMessages([initialMsg]);
@@ -384,7 +491,7 @@ export default function App() {
     }
   };
 
-  // 7. Save Profile to Firestore
+  // 8. Save Profile
   const handleSaveProfile = async () => {
     if (!user) {
       setIsAuthModalOpen(true);
@@ -394,36 +501,88 @@ export default function App() {
       setIsSaving(true);
       await setDoc(doc(db, 'profiles', user.uid), {
         ...profile,
+        appTheme: appThemeId,
+        profileExperience: profileExperienceId,
+        experienceTheme: profileExperienceId,
         userId: user.uid,
         updatedAt: new Date().toISOString()
       });
       setShowProfileBanner(false);
-      alert('Profile successfully created & saved to your account!');
+      setIsProfileEditorModalOpen(false);
     } catch (err) {
       console.error('Error saving profile:', err);
-      alert('Failed to save profile. Check Firestore connection.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  // 8. Save Roadmap to Firestore
-  const handleSaveRoadmap = async () => {
-    if (!roadmap) return;
+  // 9. Save Career
+  const handleSaveCareer = async (career: CareerRecommendation) => {
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
     try {
+      const isAlreadySaved = savedCareers.some(c => c.title === career.title);
+      if (isAlreadySaved) {
+        const itemToDelete = savedCareers.find(c => c.title === career.title);
+        if (itemToDelete?.id) {
+          await deleteDoc(doc(db, 'savedCareers', itemToDelete.id));
+          setSavedCareers(prev => prev.filter(c => c.id !== itemToDelete.id));
+        }
+        return;
+      }
+      const newItem: SavedCareerItem = {
+        title: career.title,
+        salary: career.salaryRange ? `${career.salaryRange.entry} - ${career.salaryRange.mid}` : '$110,000',
+        growth: career.demandGrowth || 'High',
+        matchScore: career.matchScore || 90,
+        skillsGapCount: career.missingSkills?.length || 2,
+        reasoning: career.shortSummary || career.reason || '',
+        savedAt: new Date().toISOString(),
+        userId: user.uid
+      };
+      const docRef = await addDoc(collection(db, 'savedCareers'), newItem);
+      setSavedCareers(prev => [{ id: docRef.id, ...newItem }, ...prev]);
+    } catch (err) {
+      console.error('Error saving career:', err);
+    }
+  };
+
+  // 10. Update Milestone Task in Roadmap
+  const handleUpdateMilestoneTask = async (milestoneId: string, taskIndex: number, completed: boolean) => {
+    if (!roadmap) return;
+    const updatedMilestones = roadmap.milestones.map(m => {
+      if (m.id === milestoneId) {
+        const updatedTasks = [...m.tasks];
+        if (typeof updatedTasks[taskIndex] === 'string') {
+          updatedTasks[taskIndex] = { title: updatedTasks[taskIndex] as string, completed };
+        } else {
+          updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], completed };
+        }
+        const allDone = updatedTasks.every(t => typeof t === 'object' ? t.completed : false);
+        return { ...m, tasks: updatedTasks, completed: allDone };
+      }
+      return m;
+    });
+    setRoadmap({ ...roadmap, milestones: updatedMilestones });
+  };
+
+  // 11. Save Roadmap to Firestore
+  const handleSaveRoadmap = async () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (!roadmap) return;
+    try {
       setIsSaving(true);
       const docRef = await addDoc(collection(db, 'roadmaps'), {
         ...roadmap,
         userId: user.uid,
-        createdAt: new Date().toISOString()
+        savedAt: new Date().toISOString()
       });
-      const savedItem = { ...roadmap, id: docRef.id, userId: user.uid };
-      setSavedRoadmaps(prev => [...prev, savedItem]);
-      alert(`Roadmap for "${roadmap.roleTitle}" saved to your Firebase account!`);
+      setSavedRoadmaps(prev => [{ ...roadmap, id: docRef.id }, ...prev]);
     } catch (err) {
       console.error('Error saving roadmap:', err);
     } finally {
@@ -431,110 +590,36 @@ export default function App() {
     }
   };
 
-  // 9. Save Career Recommendation
-  const handleSaveCareer = async (career: CareerRecommendation) => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    const exists = savedCareers.some(c => c.title === career.title);
-    if (exists) return;
-
-    try {
-      const newSaved: SavedCareerItem = {
-        userId: user.uid,
-        title: career.title,
-        matchScore: career.matchScore,
-        salary: career.salaryRange.entry,
-        growth: career.demandGrowth,
-        skillsGapCount: career.skillsGap.length,
-        reasoning: career.shortSummary,
-        savedAt: new Date().toISOString()
-      };
-
-      const docRef = await addDoc(collection(db, 'savedCareers'), newSaved);
-      newSaved.id = docRef.id;
-      setSavedCareers(prev => [...prev, newSaved]);
-    } catch (err) {
-      console.error('Error saving career:', err);
-    }
-  };
-
-  // 10. Remove Saved Career
-  const handleRemoveSavedCareer = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'savedCareers', id));
-      setSavedCareers(prev => prev.filter(c => c.id !== id));
-    } catch (err) {
-      console.error('Error deleting saved career:', err);
-    }
-  };
-
-  // 11. Update Roadmap Task Completion
-  const handleUpdateMilestoneTask = (milestoneId: string, taskIndex: number, completed: boolean) => {
-    if (!roadmap) return;
-    const updatedMilestones = roadmap.milestones.map(m => {
-      if (m.id === milestoneId) {
-        return { ...m, completed: completed };
-      }
-      return m;
-    });
-    setRoadmap({ ...roadmap, milestones: updatedMilestones });
-  };
-
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      isDarkMode 
-        ? 'bg-[#080910] text-slate-100 selection:bg-blue-500 selection:text-white' 
-        : 'bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white'
-    }`}>
+    <div className="min-h-screen bg-[#0B0D14] text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white relative">
       
-      {/* Elegant Dark Background Ambient Radial Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-50">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[160px]" />
-        <div className="absolute top-1/3 -right-40 w-[700px] h-[700px] bg-purple-900/10 rounded-full blur-[180px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[160px]" />
-      </div>
+      {/* Background ambient lighting */}
+      <AmbientThemeBackground />
 
-      {/* Main App Content Wrapper */}
-      <div className="relative z-10 flex flex-col min-h-screen">
+      {/* Top Navbar */}
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={navigateTo}
+        user={user}
+        userRole={userRole}
+        profile={profile}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onSignOut={() => firebaseSignOut(auth)}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        savedCount={savedCareers.length + savedRoadmaps.length}
+        onOpenThemeModal={openAppThemeModal}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onBack={goBack}
+        canGoBack={navigationHistory.length > 1}
+      />
+
+      <div className="flex-1 flex flex-col relative z-10">
         
-        <Navbar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          user={user}
-          onOpenAuth={() => setIsAuthModalOpen(true)}
-          onSignOut={() => firebaseSignOut(auth)}
-          isDarkMode={isDarkMode}
-          setIsDarkMode={setIsDarkMode}
-          savedCount={savedCareers.length + savedRoadmaps.length}
-        />
-
-        {/* First Login Profile Creation Banner */}
-        {user && showProfileBanner && (
-          <div className="bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 border-b border-blue-500/30 px-4 py-3">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <p className="text-slate-200">
-                  <span className="font-bold text-white">Welcome! Complete your Profile:</span> Setup your university degree, skills, and projects so Gemini AI can personalize your career discovery.
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setActiveTab('profile');
-                }}
-                className="px-4 py-1.5 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:brightness-110 transition-all shrink-0"
-              >
-                Setup Student Profile →
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Dynamic Body Views */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl relative z-10">
           
+          {/* 1. DISCOVER / RECOMMENDATIONS */}
           {activeTab === 'discover' && (
             <CareerRecommendations
               recommendations={recommendations}
@@ -542,91 +627,59 @@ export default function App() {
               onSaveCareer={handleSaveCareer}
               savedTitles={savedCareers.map(c => c.title)}
               isGenerating={isGeneratingRecs}
-              onGoToProfile={() => setActiveTab('profile')}
+              onGoToProfile={() => navigateTo('profile')}
+              onOpenScenarioSimulator={() => navigateTo('scenario')}
+              userName={user?.displayName || profile.university}
+              profile={profile}
             />
           )}
 
+          {/* 2. CAREER ASSESSMENT */}
+          {activeTab === 'assessment' && (
+            <CareerAssessment
+              user={user}
+              profile={profile}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+              onNavigateToRoadmap={handleGenerateRoadmap}
+              onBack={goBack}
+            />
+          )}
+
+          {/* 3. CAREER EXPLORER */}
           {activeTab === 'explorer' && (
             <CareerExplorer
               onSelectRoleForRoadmap={handleGenerateRoadmap}
-              onSelectRoleForSkillGap={(roleTitle) => {
-                setActiveTab('skillgap');
-                handleAnalyzeSkillGap(roleTitle);
+              onSelectRoleForSkillGap={(role) => {
+                handleAnalyzeSkillGap(role);
+                navigateTo('skillgap');
               }}
               onSaveCareer={(item) => {
-                if (user) {
-                  handleSaveCareer({
-                    id: Date.now().toString(),
-                    title: item.title,
-                    matchScore: 90,
-                    shortSummary: item.reasoning,
-                    dayInLife: '',
-                    salaryRange: { entry: item.salary, mid: item.salary },
-                    demandGrowth: item.growth,
-                    futureDemand: '',
-                    reason: item.reasoning,
-                    strengths: [],
-                    weaknesses: [],
-                    missingSkills: [],
-                    keyResponsibilities: [],
-                    matchingSkills: [],
-                    skillsGap: [],
-                    aiReasoning: '',
-                    topEmployers: []
-                  });
-                } else {
-                  setIsAuthModalOpen(true);
-                }
+                handleSaveCareer({
+                  id: item.title,
+                  title: item.title,
+                  matchScore: 90,
+                  shortSummary: item.reasoning,
+                  reason: item.reasoning,
+                  salaryRange: { entry: item.salary, mid: item.salary },
+                  demandGrowth: item.growth,
+                  futureDemand: 'High',
+                  strengths: [],
+                  weaknesses: [],
+                  matchingSkills: [],
+                  missingSkills: [],
+                  skillsGap: [],
+                  dayInLife: '',
+                  keyResponsibilities: [],
+                  aiReasoning: item.reasoning,
+                  topEmployers: []
+                });
               }}
               savedCareers={savedCareers}
+              onBack={goBack}
             />
           )}
 
-          {activeTab === 'jobmarket' && (
-            <JobMarketDashboard
-              onSelectRoleForRoadmap={(roleTitle) => {
-                setActiveTab('roadmap');
-                handleGenerateRoadmap(roleTitle);
-              }}
-              onExploreSkillGap={(roleTitle) => {
-                setActiveTab('skillgap');
-                handleAnalyzeSkillGap(roleTitle);
-              }}
-            />
-          )}
-
-          {activeTab === 'faculty' && (
-            <FacultyDashboard
-              onNavigateToRoadmap={(roleTitle) => {
-                setActiveTab('roadmap');
-                handleGenerateRoadmap(roleTitle);
-              }}
-            />
-          )}
-
-          {activeTab === 'profile' && (
-            <ProfileBuilder
-              profile={profile}
-              setProfile={setProfile}
-              onSaveProfile={handleSaveProfile}
-              onGenerateRecommendations={() => {
-                setActiveTab('discover');
-                handleGenerateRecommendations();
-              }}
-              isSaving={isSaving}
-              isGenerating={isGeneratingRecs}
-            />
-          )}
-
-          {activeTab === 'skillgap' && (
-            <SkillGapAnalysis
-              analysis={skillGapAnalysis}
-              onAnalyze={handleAnalyzeSkillGap}
-              isAnalyzing={isAnalyzingSkillGap}
-              profile={profile}
-            />
-          )}
-
+          {/* 4. LEARNING ROADMAP */}
           {activeTab === 'roadmap' && (
             <RoadmapView
               roadmap={roadmap}
@@ -636,31 +689,69 @@ export default function App() {
               isSaving={isSaving}
               onGenerateRoadmapForRole={handleGenerateRoadmap}
               isGenerating={isGeneratingRoadmap}
+              onBack={goBack}
             />
           )}
 
+          {/* 5. RESUME ANALYZER */}
           {activeTab === 'resume' && (
             <ResumeAnalyzer
               onAnalyze={handleAnalyzeResume}
               analysis={resumeAnalysis}
               isAnalyzing={isAnalyzingResume}
+              onBack={goBack}
             />
           )}
 
+          {/* 6. INTERVIEW PREP */}
           {activeTab === 'interview' && (
             <InterviewPrep
-              onGenerateQuestions={handleGenerateInterview}
-              onEvaluateAnswer={handleEvaluateAnswer}
               questions={interviewQuestions}
               evaluation={interviewEvaluation}
               isGenerating={isGeneratingInterview}
               isEvaluating={isEvaluatingInterview}
               targetRole={targetInterviewRole}
               setTargetRole={setTargetInterviewRole}
+              onGenerateQuestions={(role) => handleGenerateInterview(role)}
+              onEvaluateAnswer={handleEvaluateAnswer}
+              onBack={goBack}
             />
           )}
 
-          {activeTab === 'advisor' && (
+          {/* 7. SKILL GAP ANALYSIS */}
+          {activeTab === 'skillgap' && (
+            <SkillGapAnalysis
+              analysis={skillGapAnalysis}
+              onAnalyze={handleAnalyzeSkillGap}
+              isAnalyzing={isAnalyzingSkillGap}
+              profile={profile}
+              onBack={goBack}
+            />
+          )}
+
+          {/* 8. JOB MARKET TRENDS */}
+          {activeTab === 'jobmarket' && (
+            <JobMarketDashboard
+              onSelectRoleForRoadmap={handleGenerateRoadmap}
+              onExploreSkillGap={(role) => {
+                handleAnalyzeSkillGap(role);
+                navigateTo('skillgap');
+              }}
+              onBack={goBack}
+            />
+          )}
+
+          {/* 9. WHAT-IF SCENARIO SIMULATOR */}
+          {activeTab === 'scenario' && (
+            <ScenarioSimulator
+              profile={profile}
+              onNavigateToRoadmap={handleGenerateRoadmap}
+              onBack={goBack}
+            />
+          )}
+
+          {/* 10. AI ADVISOR CHAT */}
+          {activeTab === 'chat' && (
             <AdvisorChat
               messages={chatMessages}
               onSendMessage={handleSendMessage}
@@ -668,41 +759,141 @@ export default function App() {
               isThinking={isChatThinking}
               profile={profile}
               roadmap={roadmap}
+              onBack={goBack}
             />
           )}
 
+          {/* 11. SAVED CAREERS & ROADMAPS */}
           {activeTab === 'saved' && (
             <SavedCareersView
               savedCareers={savedCareers}
               savedRoadmaps={savedRoadmaps}
-              onRemoveSavedCareer={handleRemoveSavedCareer}
+              onRemoveSavedCareer={async (id) => {
+                try {
+                  await deleteDoc(doc(db, 'savedCareers', id));
+                  setSavedCareers(prev => prev.filter(c => c.id !== id));
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
               onSelectRoadmap={(rm) => {
                 setRoadmap(rm);
-                setActiveTab('roadmap');
+                navigateTo('roadmap');
               }}
               onSelectRoleForRoadmap={handleGenerateRoadmap}
               user={user}
               onOpenAuth={() => setIsAuthModalOpen(true)}
+              onBack={goBack}
+            />
+          )}
+
+          {/* 12. FACULTY & INSTITUTIONAL DASHBOARD */}
+          {activeTab === 'faculty' && (
+            <FacultyDashboard
+              onNavigateToRoadmap={(roleTitle) => {
+                handleGenerateRoadmap(roleTitle);
+                navigateTo('roadmap');
+              }}
+              onBack={goBack}
+              user={user}
+              userRole={userRole}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+              onRefreshRole={refreshUserRole}
+            />
+          )}
+
+          {/* 13. STUDENT PROFILE */}
+          {activeTab === 'profile' && (
+            <ProfileView
+              profile={profile}
+              user={user}
+              userRole={userRole}
+              savedCareers={savedCareers}
+              savedRoadmaps={savedRoadmaps}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+              onSignOut={() => firebaseSignOut(auth)}
+              onOpenThemeModal={openAppThemeModal}
+              onOpenProfileExperienceModal={openProfileExperienceModal}
+              onNavigateToTab={navigateTo}
+              onUpdateProfile={(updated) => setProfile(prev => ({ ...prev, ...updated }))}
+              onOpenEditProfileModal={() => setIsProfileEditorModalOpen(true)}
             />
           )}
 
         </main>
 
-        {/* Footer */}
-        <footer className={`mt-auto border-t py-6 transition-colors duration-300 ${
-          isDarkMode ? 'bg-[#080910]/90 border-slate-800/60 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
-        }`}>
-          <div className="max-w-7xl mx-auto px-4 text-center text-xs space-y-1">
-            <p className="font-semibold text-slate-300">
-              CareerCompass AI &copy; {new Date().getFullYear()} — Powered by Gemini AI & Firebase Firestore
-            </p>
-            <p className="text-[11px] text-slate-500">
-              Tailored career discovery, skill matrix roadmaps, and recruiter resume feedback for university students.
-            </p>
+        {/* Minimal Footer */}
+        <footer className="border-t border-white/[0.06] py-6 bg-[#0E111B]/80 text-slate-500 text-xs mt-auto">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-400">CareerCompass AI</span>
+              <span>&copy; {new Date().getFullYear()}</span>
+              <span>&bull;</span>
+              <span>Built with Gemini AI &amp; Firestore</span>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] text-slate-400">
+              <button 
+                type="button" 
+                onClick={() => navigateTo('faculty')}
+                className="hover:text-indigo-400 cursor-pointer"
+              >
+                Faculty Dashboard
+              </button>
+              <button 
+                type="button" 
+                onClick={() => navigateTo('jobmarket')}
+                className="hover:text-indigo-400 cursor-pointer"
+              >
+                Market Analytics
+              </button>
+              <button 
+                type="button" 
+                onClick={() => navigateTo('scenario')}
+                className="hover:text-indigo-400 cursor-pointer"
+              >
+                What-If Simulator
+              </button>
+            </div>
           </div>
         </footer>
 
       </div>
+
+      {/* Profile Builder Modal */}
+      {isProfileEditorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-4xl bg-[#131724] border border-white/[0.10] rounded-3xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white">Edit Student Profile</h3>
+                <p className="text-xs text-slate-400">Update academic credentials, coursework, and technical skills</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsProfileEditorModalOpen(false)}
+                className="p-1.5 rounded-lg bg-white/[0.04] text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <ProfileBuilder
+              profile={profile}
+              setProfile={setProfile}
+              onSaveProfile={handleSaveProfile}
+              onGenerateRecommendations={() => {
+                handleGenerateRecommendations();
+                setIsProfileEditorModalOpen(false);
+                navigateTo('discover');
+              }}
+              isSaving={isSaving}
+              isGenerating={isGeneratingRecs}
+              topRecommendation={recommendations[0]}
+              skillGapAnalysis={skillGapAnalysis}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Auth Modal */}
       <AuthModal
@@ -716,6 +907,40 @@ export default function App() {
         }}
       />
 
+      {/* Theme Studio Modal */}
+      <ThemeSelectorModal
+        isOpen={isAppThemeModalOpen}
+        onClose={closeAppThemeModal}
+        onAppThemeSaved={handleAppThemeSavedToProfile}
+        onProfileExperienceSaved={handleProfileExperienceSavedToProfile}
+        onThemeSavedToProfile={handleProfileExperienceSavedToProfile}
+      />
+
+      {/* Profile Experience Modal */}
+      <ProfileExperienceModal
+        isOpen={isProfileExperienceModalOpen}
+        onClose={closeProfileExperienceModal}
+        onSelectExperience={handleProfileExperienceSavedToProfile}
+      />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onNavigateToProfile={() => setActiveTab('profile')}
+        onAppThemeSaved={handleAppThemeSavedToProfile}
+        onProfileExperienceSaved={handleProfileExperienceSavedToProfile}
+        onThemeSavedToProfile={handleProfileExperienceSavedToProfile}
+      />
+
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

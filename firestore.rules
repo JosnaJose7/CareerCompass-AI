@@ -1,32 +1,187 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // =========================================================================
+    // GLOBAL DEFAULT DENY SAFETY NET
+    // =========================================================================
+    // Ensures any unrecognized or unmapped collection paths reject all operations
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // ROLE-BASED ACCESS CONTROL (RBAC) FUNCTIONS
+    // =========================================================================
+    // The authorization model operates on three distinct roles:
+    // 1. student: Can access and mutate strictly their own records
+    // 2. faculty: Verified academic mentors authorized to review and record facultyActions
+    // 3. admin: System administrators authorized to manage rosters and governance
+
     function isAuthenticated() {
       return request.auth != null;
     }
 
+    // Superadmin runtime bootstrap: matches verified project administrator
+    function isSuperAdminEmail() {
+      return isAuthenticated() && 
+        request.auth.token.email == 'shynijose14@gmail.com' && 
+        request.auth.token.email_verified == true;
+    }
+
+    // Administrators: Authenticated users with cryptographically signed admin custom claim,
+    // presence in trusted /admins/{uid} roster, or verified superadmin email.
+    // Client-side user profile fields are NEVER trusted.
+    function isAdmin() {
+      return isAuthenticated() && (
+        isSuperAdminEmail() ||
+        request.auth.token.role == 'admin' ||
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Faculty: Authenticated users with verified faculty or admin custom claims,
+    // presence in trusted /facultyUsers/{uid} roster, or verified admin status.
+    // Ordinary students cannot obtain this role through client-side tampering.
+    function isFaculty() {
+      return isAuthenticated() && (
+        isAdmin() ||
+        request.auth.token.role == 'faculty' ||
+        request.auth.token.faculty == true ||
+        exists(/databases/$(database)/documents/facultyUsers/$(request.auth.uid))
+      );
+    }
+
+    // =========================================================================
+    // STUDENT ISOLATION & DATA OWNERSHIP RULES
+    // =========================================================================
+
+    // 1. User Profiles & Accounts
     match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isFaculty());
+      allow create, update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // 2. Student Academic & Skills Profiles
+    match /profiles/{docId} {
+      allow read: if isAuthenticated() && (
+        docId == request.auth.uid || 
+        (resource != null && resource.data.userId == request.auth.uid) || 
+        isFaculty()
+      );
+      allow create: if isAuthenticated() && (
+        docId == request.auth.uid || 
+        request.resource.data.userId == request.auth.uid
+      );
+      allow update, delete: if isAuthenticated() && (
+        docId == request.auth.uid || 
+        (resource != null && resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+    }
+
+    // 3. Career Roadmaps
+    match /roadmaps/{docId} {
+      allow read: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid || 
+        isFaculty()
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // 4. Saved Careers & Bookmarks
+    match /savedCareers/{docId} {
+      allow read: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid || 
+        isFaculty()
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // 5. Interview Sessions & Evaluations
+    match /interviewSessions/{docId} {
+      allow read: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid || 
+        isFaculty()
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // 6. Career Assessments & AI Diagnostic Reports
+    match /assessments/{docId} {
+      allow read: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid || 
+        isFaculty()
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource == null || 
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // 7. Student AI Mentor Chat History (Strictly Isolated to Student)
+    // Even faculty mentors cannot read a student's private AI advisor chat log
+    match /chatHistory/{userId} {
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    match /profiles/{docId} {
-      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    // =========================================================================
+    // FACULTY GOVERNANCE & OVERSIGHT RULES
+    // =========================================================================
+
+    // 8. Faculty Actions (Approvals, Endorsements, Recommendations, Feedback, Notes)
+    // CRITICAL RBAC ENFORCEMENT:
+    // - Ordinary authenticated students CANNOT write to facultyActions (create, update, delete are strictly forbidden)
+    // - Unauthenticated users cannot read or write anything
+    // - Students can ONLY read non-private feedback/endorsements addressed directly to them (resource.data.studentId == request.auth.uid)
+    // - Faculty and Admins can read and manage faculty oversight records
+    match /facultyActions/{docId} {
+      allow read: if isFaculty() || (
+        isAuthenticated() && 
+        resource != null && 
+        resource.data.studentId == request.auth.uid && 
+        resource.data.isPrivate != true
+      );
+      allow create: if isFaculty() && request.resource.data.facultyUid == request.auth.uid;
+      allow update: if isFaculty() && (resource.data.facultyUid == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() || (isFaculty() && resource.data.facultyUid == request.auth.uid);
     }
 
-    match /roadmaps/{docId} {
-      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    // 9. Faculty Roster Directory
+    // Readable by authenticated users for verification; writable only by verified administrators
+    match /facultyUsers/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
-    match /savedCareers/{docId} {
-      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-    }
-
-    match /interviewSessions/{docId} {
-      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    // 10. Administrator Directory
+    // Strictly protected: writable only by verified administrators
+    match /admins/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
     }
   }
 }

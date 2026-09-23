@@ -2,14 +2,11 @@ import React from 'react';
 import { 
   Bookmark, 
   Trash2, 
-  ArrowRight, 
-  TrendingUp, 
-  DollarSign, 
-  Sparkles,
-  Map,
-  CheckCircle2
+  ArrowRight,
+  BookMarked
 } from 'lucide-react';
 import { SavedCareerItem, CareerRoadmap } from '../types';
+import { BackButton } from './BackButton';
 
 interface SavedCareersViewProps {
   savedCareers: SavedCareerItem[];
@@ -19,6 +16,7 @@ interface SavedCareersViewProps {
   onSelectRoleForRoadmap: (title: string) => void;
   user: any;
   onOpenAuth: () => void;
+  onBack?: () => void;
 }
 
 export const SavedCareersView: React.FC<SavedCareersViewProps> = ({
@@ -29,124 +27,138 @@ export const SavedCareersView: React.FC<SavedCareersViewProps> = ({
   onSelectRoleForRoadmap,
   user,
   onOpenAuth,
+  onBack,
 }) => {
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
       
-      {/* Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/50 to-purple-900/40 border border-indigo-500/30 backdrop-blur-xl shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-2">
-            <Bookmark className="w-3.5 h-3.5" />
-            <span>Firebase Cloud Storage</span>
+      {/* 1. Header */}
+      <div className="border-b border-white/[0.08] pb-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3">
+          <div className="flex items-start gap-3">
+            {onBack && <BackButton onClick={onBack} />}
+            <div>
+              <div className="flex items-center gap-2 text-[11px] font-mono text-indigo-400 uppercase tracking-wider">
+                <BookMarked className="w-3.5 h-3.5" />
+                <span>Personal Saved Trajectories</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
+                Saved Career Trajectories & Roadmaps
+              </h1>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Your bookmarked career pathways and active step-by-step preparation roadmaps.
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Saved Career Paths & Roadmaps
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mt-1">
-            Access your bookmarked career options and saved action roadmaps from any browser or device.
-          </p>
-        </div>
 
-        {!user && (
-          <button
-            onClick={onOpenAuth}
-            className="px-4 py-2.5 rounded-2xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shrink-0"
-          >
-            Sign In to Sync Firebase Data
-          </button>
-        )}
+          {!user && (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-xs cursor-pointer shrink-0"
+            >
+              Sign In to Sync
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Saved Roadmaps Section */}
-      <div className="space-y-4">
-        <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-          <Map className="w-5 h-5 text-indigo-400" />
-          <span>Saved Career Roadmaps ({savedRoadmaps.length}):</span>
+      {/* 2. Saved Roadmaps */}
+      <div className="p-5 sm:p-6 rounded-xl bg-[#131724] border border-white/[0.08] shadow-sm space-y-4">
+        <h2 className="text-xs uppercase tracking-wider font-mono text-indigo-400 font-semibold">
+          Active Roadmaps ({savedRoadmaps.length})
         </h2>
 
         {savedRoadmaps.length === 0 ? (
-          <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 text-center text-xs text-slate-500 italic">
-            No saved roadmaps yet. Click "Save to Firebase" on any generated roadmap.
-          </div>
+          <p className="text-xs text-slate-500 italic py-2">
+            No saved roadmaps yet. Generate and save a roadmap to access it here.
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2.5">
             {savedRoadmaps.map((rm, idx) => (
               <div
                 key={rm.id || idx}
-                className="p-5 rounded-2xl bg-slate-900/70 border border-indigo-500/20 hover:border-indigo-500/40 backdrop-blur-xl space-y-3 transition-all"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#0E111B] border border-white/[0.06]"
               >
-                <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
-                    {rm.estimatedTimeToJobReady || 'Career Plan'}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {rm.milestones?.length || 0} Phases
-                  </span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-indigo-400 font-mono">0{idx + 1}.</span>
+                    <h3 className="text-sm font-semibold text-white">{rm.targetRole || rm.roleTitle}</h3>
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded border border-indigo-500/20 bg-indigo-500/10 text-indigo-300">
+                      {rm.durationMonths || 6} Months
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 pl-6">
+                    {rm.overview || 'Step-by-step preparation milestone roadmap'}
+                  </p>
                 </div>
 
-                <h3 className="font-bold text-sm text-white">{rm.roleTitle}</h3>
-                <p className="text-xs text-slate-300 line-clamp-2">{rm.overview}</p>
-
-                <button
-                  onClick={() => onSelectRoadmap(rm)}
-                  className="w-full py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center gap-1.5"
-                >
-                  <span>Open Roadmap</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                <div className="pl-6 sm:pl-0 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onSelectRoadmap(rm)}
+                    className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <span>Open Roadmap</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Saved Careers Section */}
-      <div className="space-y-4">
-        <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-          <Bookmark className="w-5 h-5 text-purple-400" />
-          <span>Bookmarked Career Roles ({savedCareers.length}):</span>
+      {/* 3. Saved Careers */}
+      <div className="p-5 sm:p-6 rounded-xl bg-[#131724] border border-white/[0.08] shadow-sm space-y-4">
+        <h2 className="text-xs uppercase tracking-wider font-mono text-indigo-400 font-semibold">
+          Bookmarked Career Roles ({savedCareers.length})
         </h2>
 
         {savedCareers.length === 0 ? (
-          <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 text-center text-xs text-slate-500 italic">
-            No bookmarked career roles. Click the bookmark icon on AI Discovery cards.
-          </div>
+          <p className="text-xs text-slate-500 italic py-2">
+            No bookmarked roles yet. Click the bookmark icon on any career recommendation card.
+          </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {savedCareers.map((item) => (
+          <div className="space-y-2.5">
+            {savedCareers.map((c, idx) => (
               <div
-                key={item.id || item.title}
-                className="relative p-5 rounded-2xl bg-slate-900/70 border border-indigo-500/20 backdrop-blur-xl space-y-3 transition-all"
+                key={c.id || idx}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#0E111B] border border-white/[0.06]"
               >
-                <button
-                  onClick={() => item.id && onRemoveSavedCareer(item.id)}
-                  className="absolute top-4 right-4 p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800"
-                  title="Remove from saved"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-center gap-2 pr-8">
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                    {item.matchScore}% Match
-                  </span>
-                  <h3 className="font-bold text-sm text-white truncate">{item.title}</h3>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-indigo-400 font-mono">0{idx + 1}.</span>
+                    <h3 className="text-sm font-semibold text-white">{c.title}</h3>
+                    {c.matchScore && (
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+                        {c.matchScore}% Match
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 pl-6">
+                    {c.salary || c.salaryRange?.entry || '$90,000 - $120,000'}
+                  </p>
                 </div>
 
-                <div className="text-xs text-slate-300 space-y-1">
-                  <p><strong>Salary:</strong> {item.salary}</p>
-                  <p><strong>Demand:</strong> {item.growth}</p>
-                  <p className="line-clamp-2 italic text-slate-400">{item.reasoning}</p>
+                <div className="flex items-center gap-2 pl-6 sm:pl-0 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onSelectRoleForRoadmap(c.title)}
+                    className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <span>Build Roadmap</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveSavedCareer(c.id)}
+                    className="p-1.5 rounded-lg border border-white/[0.10] bg-[#131724] text-slate-400 hover:text-rose-400 hover:border-rose-500/30 transition-all cursor-pointer"
+                    title="Remove from saved"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => onSelectRoleForRoadmap(item.title)}
-                  className="w-full py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white border border-slate-700 transition-all flex items-center justify-center gap-1.5"
-                >
-                  <span>Generate Roadmap for {item.title}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
               </div>
             ))}
           </div>

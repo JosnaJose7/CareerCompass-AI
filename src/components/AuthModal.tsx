@@ -136,26 +136,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080910]/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 text-slate-100 shadow-2xl shadow-blue-950/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-xl bg-[#131724] border border-white/[0.08] text-slate-100 shadow-xl">
         
-        {/* Glow Element */}
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/10 blur-[80px] pointer-events-none" />
-
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+          className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 text-white mb-3 shadow-lg shadow-blue-500/20">
-            {mode === 'forgot_password' ? <KeyRound className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+          <div className="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 mb-3 shadow-xs">
+            {mode === 'forgot_password' ? <KeyRound className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
           </div>
-          <h3 className="text-xl font-extrabold text-slate-100 tracking-tight">
+          <h3 className="text-xl font-bold text-white tracking-tight">
             {mode === 'signup' && 'Create CareerCompass Account'}
             {mode === 'login' && 'Welcome Back'}
             {mode === 'forgot_password' && 'Reset Your Password'}
@@ -168,23 +165,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+          <div className="mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
 
         {infoMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-start gap-2">
+          <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-start gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
             <span>{infoMessage}</span>
           </div>
         )}
 
         {/* Auth Form */}
-        <form onSubmit={handleEmailAuth} className="space-y-4">
+        <form onSubmit={handleEmailAuth} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">University Email</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">University Email</label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
               <input
@@ -193,7 +190,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@stanford.edu"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#0E111B] border border-white/[0.12] text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors"
               />
             </div>
           </div>
@@ -201,7 +198,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           {mode !== 'forgot_password' && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-slate-300">Password</label>
+                <label className="block text-xs font-medium text-slate-300">Password</label>
                 {mode === 'login' && (
                   <button
                     type="button"
@@ -210,7 +207,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                       setError(null);
                       setInfoMessage(null);
                     }}
-                    className="text-[11px] text-blue-400 hover:underline"
+                    className="text-[11px] text-indigo-400 hover:underline cursor-pointer"
                   >
                     Forgot password?
                   </button>
@@ -224,7 +221,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#0E111B] border border-white/[0.12] text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
             </div>
@@ -233,7 +230,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-900/20 hover:brightness-110 transition-all flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg font-semibold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {loading ? (
               'Processing...'
@@ -255,24 +252,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               setError(null);
               setInfoMessage(null);
             }}
-            className="mt-4 w-full text-center text-xs text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1"
+            className="mt-4 w-full text-center text-xs text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1 cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Sign In
           </button>
         ) : (
           <>
-            <div className="my-5 flex items-center justify-between text-xs text-slate-500">
-              <div className="h-px bg-slate-800 w-full" />
-              <span className="px-3 whitespace-nowrap">OR</span>
-              <div className="h-px bg-slate-800 w-full" />
+            <div className="my-4 flex items-center justify-between text-xs text-slate-500">
+              <div className="h-px bg-white/[0.08] w-full" />
+              <span className="px-3 text-[10px] font-mono whitespace-nowrap text-slate-500">OR</span>
+              <div className="h-px bg-white/[0.08] w-full" />
             </div>
 
             {/* Google & Demo Actions */}
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <button
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 text-slate-200 transition-all flex items-center justify-center gap-2 shadow-sm"
+                className="w-full py-2.5 px-4 rounded-lg font-medium text-xs bg-[#0E111B] hover:bg-white/[0.04] border border-white/[0.10] text-slate-200 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -286,7 +283,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               <button
                 onClick={handleDemoSignIn}
                 disabled={loading}
-                className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20 transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 rounded-lg font-medium text-xs bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <UserCheck className="w-4 h-4" />
                 Quick Guest Demo Mode
@@ -294,9 +291,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
             </div>
 
             {/* Persistent Login note & Toggle Sign Up / Sign In */}
-            <div className="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-              <span className="flex items-center gap-1 text-[11px] text-slate-500">
-                <ShieldCheck className="w-3.5 h-3.5 text-blue-400" /> Persistent Session
+            <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
+              <span className="flex items-center gap-1 text-[11px] font-mono text-slate-500">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" /> Persistent Session
               </span>
               <div>
                 {mode === 'signup' ? 'Already registered?' : "Need an account?"}{' '}
@@ -306,7 +303,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
                     setError(null);
                     setInfoMessage(null);
                   }}
-                  className="text-blue-400 font-bold hover:underline"
+                  className="text-indigo-400 font-semibold hover:underline cursor-pointer"
                 >
                   {mode === 'signup' ? 'Sign In' : 'Sign Up'}
                 </button>

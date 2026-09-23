@@ -17,7 +17,8 @@ export interface Internship {
 export interface Hackathon {
   id: string;
   name: string;
-  projectOrAward: string;
+  projectOrAward?: string;
+  award?: string;
   year?: string;
 }
 
@@ -59,6 +60,15 @@ export interface StudentProfile {
   expectedSalary?: string;
   targetIndustries: string[];
   careerGoals: string;
+  appTheme?: string;
+  profileExperience?: string;
+  experienceTheme?: string;
+
+  // Personalized Profile Portrait
+  avatarUrl?: string;
+  avatarType?: 'upload' | 'abstract' | 'generated' | 'initials';
+  avatarStyle?: string;
+  avatarFrameStyle?: string;
 
   updatedAt?: string;
 }
@@ -75,6 +85,16 @@ export interface CareerRecommendation {
   title: string;
   matchScore: number; // 0 - 100
   shortSummary: string;
+  whyRecommended?: string; // Transparent factor breakdown
+  supportingFactors?: string[]; // Bullet list of contributing profile strengths across 11 dimensions
+  areasForImprovement?: string[]; // Areas that need improvement
+  requiredSkills?: string[]; // Required skills for this career
+  matchingSkills: string[];
+  relevantInterests?: string[]; // Relevant interests provided by student
+  relevantProjects?: string[]; // Relevant projects provided by student
+  relevantAssessmentStrengths?: string[]; // Relevant assessment strengths
+  missingSkills: string[]; // Key missing skills to bridge
+  recommendedNextSteps?: string[]; // Actionable next steps
   dayInLife: string;
   salaryRange: {
     entry: string;
@@ -86,9 +106,7 @@ export interface CareerRecommendation {
   reason: string; // Direct match reasoning
   strengths: string[]; // Key candidate strengths for this role
   weaknesses: string[]; // Relative weaknesses or areas for improvement
-  missingSkills: string[]; // Key missing skills to bridge
   keyResponsibilities: string[];
-  matchingSkills: string[];
   skillsGap: SkillGapItem[];
   aiReasoning: string;
   topEmployers: string[];
@@ -378,6 +396,31 @@ export interface JobMarketOverview {
   aiSummary: string;
 }
 
+export interface FacultyEndorsement {
+  id: string;
+  studentId: string;
+  targetRole: string;
+  endorsedBy: string;
+  facultyDesignation: string;
+  department: string;
+  status: 'Pending' | 'Approved' | 'Needs Revision' | 'Rejected';
+  endorsementStatement: string;
+  strengthsHighlighted: string[];
+  institutionalStamp: string;
+  dateEndorsed: string;
+  officialBadgeIssued: boolean;
+}
+
+export interface FacultyAuditItem {
+  id: string;
+  timestamp: string;
+  actor: string;
+  action: string;
+  category: 'AI Assessment' | 'Faculty Endorsement' | 'Roadmap Approval' | 'Feedback Added' | 'Note Added';
+  details: string;
+  status?: 'Pending' | 'Approved' | 'Needs Revision' | 'Rejected';
+}
+
 export interface FacultyStudent {
   id: string;
   name: string;
@@ -397,6 +440,13 @@ export interface FacultyStudent {
   completedProjectsCount: number;
   certificationsCount: number;
   mockInterviewScore: number;
+  assessmentReport?: AssessmentReport;
+  aiRecommendations?: AssessmentReportRecommendation[];
+  skillGapAnalysis?: SkillGapAnalysisResult;
+  roadmap?: CareerRoadmap;
+  endorsement?: FacultyEndorsement;
+  roadmapApprovalStatus?: 'Pending' | 'Approved' | 'Needs Revision' | 'Rejected';
+  auditTrail?: FacultyAuditItem[];
 }
 
 export interface FacultyRecommendation {
@@ -417,7 +467,7 @@ export interface FacultyApprovalRequest {
   type: 'Roadmap Approval' | 'Career Choice' | 'Internship Credit' | 'Project Exemption' | 'Skill Certification';
   title: string;
   description: string;
-  status: 'Pending' | 'Approved' | 'Revision Requested' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Needs Revision' | 'Rejected';
   submittedDate: string;
   facultyComment?: string;
   reviewedDate?: string;
@@ -444,4 +494,223 @@ export interface FacultyNote {
   createdAt: string;
   updatedAt?: string;
 }
+
+// Assessment Interfaces
+export interface AptitudeQuestion {
+  id: string;
+  category: 'Logical Reasoning' | 'Quantitative Aptitude' | 'Verbal Ability' | 'Problem Solving' | 'Basic Programming';
+  question: string;
+  options: string[];
+  correctAnswer: number; // 0-based index
+  explanation: string;
+}
+
+export interface AssessmentProject {
+  id: string;
+  name: string;
+  description: string;
+  techStack: string;
+  link?: string;
+  isDeployed: boolean;
+  isTeam: boolean;
+  difficulty: 'Basic' | 'Intermediate' | 'Advanced';
+}
+
+export interface AssessmentCertification {
+  id: string;
+  title: string;
+  provider: string;
+  year: string;
+  credentialUrl?: string;
+}
+
+export interface AssessmentResponses {
+  id?: string;
+  userId: string;
+  currentStep: number;
+  updatedAt?: string;
+
+  personalInfo?: {
+    fullName: string;
+    university: string;
+    department: string;
+    semester: string;
+    cgpa?: string;
+    country: string;
+    preferredLocation: string;
+  };
+
+  careerGoals?: {
+    targetRole: string;
+    secondaryRole?: string;
+    dreamCompany: string;
+    postGradGoal: string;
+    expectedSalary: string;
+    workArrangement: 'Remote' | 'Hybrid' | 'In-Office' | 'Flexible';
+  };
+
+  technicalSkills?: {
+    languages: string[];
+    frameworks: string[];
+    customSkills: string[];
+    proficiency: { [skillName: string]: 'Beginner' | 'Intermediate' | 'Advanced' };
+  };
+
+  projectExperience?: AssessmentProject[];
+
+  certifications?: AssessmentCertification[];
+
+  interests?: string[];
+
+  personality?: { [scenarioId: string]: number }; // 1 to 5 scale
+
+  learningStyle?: {
+    methods: string[];
+    timeCommitment: string;
+  };
+
+  aptitudeTest?: {
+    answers: { [questionId: string]: number };
+    totalScore: number;
+    maxScore: number;
+    percentage: number;
+    timeSpentSeconds: number;
+    categoryBreakdown: { [category: string]: { correct: number; total: number } };
+  };
+
+  careerPreferences?: { [domain: string]: number }; // 1 to 5 rating
+
+  workPreferences?: {
+    environment: string;
+    workLifePriority: number; // 1 to 5
+  };
+
+  selfEvaluation?: { [capability: string]: number }; // 1 to 5 rating
+}
+
+export interface AssessmentReportRecommendation {
+  id: string;
+  title: string;
+  matchScore: number;
+  shortSummary: string;
+  whyRecommended: string;
+  matchingSkills?: string[]; // Current matching skills
+  relevantInterests?: string[]; // Relevant student interests
+  relevantProjects?: string[]; // Relevant student projects
+  relevantAssessmentStrengths?: string[]; // Assessment strengths
+  missingSkills?: string[]; // Skill gaps to bridge
+  recommendedNextSteps?: string[]; // Recommended next steps
+  supportingFactors?: string[]; // Contributing profile strengths across dimensions
+  areasForImprovement?: string[]; // Areas that need improvement
+  requiredSkills?: string[]; // Required skills for the role
+  dayInLife: string;
+  salaryRanges: {
+    entry: string;
+    mid: string;
+    senior: string;
+  };
+  demandGrowth: string;
+  futureDemand: string;
+  topEmployers: string[];
+}
+
+export interface DimensionBreakdown {
+  academics: number;
+  technicalSkills: number;
+  projects: number;
+  certifications: number;
+  interests: number;
+  personality: number;
+  learningStyle: number;
+  aptitude: number;
+  domainPreferences: number;
+  workEnvironment: number;
+  careerGoals: number;
+}
+
+export interface DimensionDetail {
+  key: keyof DimensionBreakdown;
+  label: string;
+  score: number;
+  weight: number;
+  weightedContribution: number;
+  description: string;
+}
+
+export interface CareerReadinessResult {
+  readinessScore: number;
+  breakdown: DimensionBreakdown;
+  dimensionDetails: DimensionDetail[];
+  summary: string;
+}
+
+export interface AssessmentReport {
+  id?: string;
+  userId: string;
+  readinessScore: number;
+  readinessBreakdown?: DimensionBreakdown;
+  summary: string;
+  topRecommendations: AssessmentReportRecommendation[];
+  strengthsAndWeaknesses: {
+    strengths: string[];
+    weaknesses: string[];
+  };
+  skillGapAnalysis: {
+    skill: string;
+    category: string;
+    importance: string;
+    recommendedCourses: string[];
+    certifications: string[];
+    projectIdeas: string[];
+  }[];
+  actionRoadmap: {
+    month: string;
+    focus: string;
+    weeklyTasks: string[];
+  }[];
+  interviewTips: string[];
+  whatIfSimulations: {
+    currentReadiness: number;
+    hypotheticalReadiness: number;
+    impactSummary: string;
+    leveragedImprovements: string[];
+  };
+  createdAt: string;
+}
+
+// ==========================================
+// ROLE-BASED ACCESS CONTROL (RBAC) TYPES
+// ==========================================
+
+export type UserRole = 'student' | 'faculty' | 'admin';
+
+export interface UserAuthRole {
+  uid: string;
+  email: string | null;
+  role: UserRole;
+  isFaculty: boolean;
+  isAdmin: boolean;
+  emailVerified: boolean;
+  customClaimsSource: 'custom_claims' | 'firestore_roster' | 'superadmin' | 'guest_student';
+}
+
+export interface FacultyActionDocument {
+  id?: string;
+  type: 'Roadmap Approval' | 'Recommendation' | 'Feedback' | 'Note' | 'Endorsement';
+  facultyUid: string;
+  facultyEmail?: string;
+  facultyName: string;
+  facultyDesignation: string;
+  studentId: string;
+  studentName: string;
+  action: string;
+  status?: 'Pending' | 'Approved' | 'Needs Revision' | 'Rejected';
+  details: string;
+  category: string;
+  isPrivate?: boolean;
+  createdAt: string;
+  timestamp: string;
+}
+
+
 

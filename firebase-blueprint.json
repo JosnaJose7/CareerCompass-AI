@@ -55,6 +55,69 @@
         "createdAt": { "type": "string" }
       },
       "required": ["userId", "title"]
+    },
+    "assessments": {
+      "title": "Career Assessments",
+      "description": "Multi-step AI career assessment responses and generated report",
+      "properties": {
+        "userId": { "type": "string" },
+        "responses": { "type": "object" },
+        "report": { "type": "object" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId"]
+    },
+    "chatHistory": {
+      "title": "Chat History",
+      "description": "AI Mentor conversation log",
+      "properties": {
+        "userId": { "type": "string" },
+        "messages": { "type": "array", "items": { "type": "object" } },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId"]
+    },
+    "facultyActions": {
+      "title": "Faculty Actions",
+      "description": "Official faculty mentorship approvals, endorsements, recommendations, evaluations, and audit events",
+      "properties": {
+        "facultyUid": { "type": "string" },
+        "facultyName": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "action": { "type": "string" },
+        "type": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string" },
+        "details": { "type": "string" },
+        "isPrivate": { "type": "boolean" },
+        "timestamp": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["facultyUid", "studentId", "action", "type"]
+    },
+    "facultyUsers": {
+      "title": "Faculty Directory",
+      "description": "Directory of verified academic faculty members and mentors authorized for the faculty portal",
+      "properties": {
+        "email": { "type": "string" },
+        "fullName": { "type": "string" },
+        "designation": { "type": "string" },
+        "department": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "fullName"]
+    },
+    "admins": {
+      "title": "Administrator Roster",
+      "description": "System administrators authorized to manage roles and institutional settings",
+      "properties": {
+        "email": { "type": "string" },
+        "fullName": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["email"]
     }
   }
 }
