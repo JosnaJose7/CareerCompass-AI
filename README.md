@@ -1,115 +1,240 @@
-# 🧭 CareerCompass AI — Next-Gen AI Career Guidance & Job Market Analytics Platform
+# 🧭 CareerCompass AI — AI-Powered Career Guidance & Mentorship Platform
 
-**CareerCompass AI** is a comprehensive, AI-driven career guidance, job market analytics, and faculty mentorship platform powered by **Google Gemini 2.5**, **React 18**, **TypeScript**, **Tailwind CSS**, and **Firebase (Auth & Firestore)**.
+**CareerCompass AI** is an AI-powered career guidance, skill assessment, job-market analytics, resume analysis, interview preparation, and faculty mentorship platform.
 
-It empowers students and job seekers with data-driven career recommendations, personalized 9-month roadmaps, skill gap diagnostics, resume optimization, interactive mock interviews, and live job market intelligence — while providing faculty mentors with a dedicated portal to guide student outcomes.
+It combines **Google Gemini**, **React**, **TypeScript**, **Tailwind CSS**, **Express.js**, and **Firebase** to provide students with personalized career insights and actionable development plans, while providing faculty mentors with tools to monitor and guide student progress.
 
 ---
 
 ## ✨ Key Features
 
-### 1. 📊 Interactive Job Market Dashboard
-- **Top Hiring Skills**: Real-time demand percentages, YoY growth rates, and salary premiums across AI, Cloud, Full-Stack, and Security.
-- **Trending Technology Momentum**: Multi-year technology trajectory tracking (2024–2027) with adoption level classification (*Mainstream*, *Rapid Growth*, *Emerging*).
-- **Popular Careers Directory**: Job openings index, entry/mid/senior salary breakdowns, and top hiring employers.
-- **Demand Level Distribution**: Visualized market share distribution across high-growth and saturated career sectors.
-- **5-Year Future Scope Radar**: Multi-axis radar analysis evaluating growth potential, AI automation resilience, remote flexibility, and entry accessibility.
+### 1. 📊 Job Market Analytics Dashboard
+
+- **Top Hiring Skills**: Displays structured skill-demand percentages, year-over-year growth indicators, and salary premium information across AI, Cloud, Full-Stack, Security, and other technology areas.
+- **Trending Technology Momentum**: Tracks technology trends across multiple years with adoption-level classifications such as *Mainstream*, *Rapid Growth*, and *Emerging*.
+- **Popular Careers Directory**: Provides career information including job-opening indicators, entry/mid/senior salary information, hiring employers, and required skills.
+- **Demand Level Distribution**: Visualizes the distribution of career-market demand across different sectors.
+- **5-Year Future Scope Radar**: Multi-axis analysis covering growth potential, AI automation resilience, remote-work flexibility, and entry accessibility.
+- **Interactive Visualizations**: Uses charts and visual analytics to make career and market information easier to understand.
+
+> **Note:** The current job-market dashboard uses structured application datasets for analytics and visualization. It is not a direct real-time feed from external job portals.
 
 ### 2. 🎓 Faculty Mentorship Portal
-- **Student Progress Tracker**: Monitor student readiness scores, CGPA, roadmap completion rates, and verified capstone portfolios.
-- **Career Endorsements**: Faculty advisors can post official role recommendations and academic rationale.
-- **Approvals Hub**: Review and approve student roadmap submissions, internship credit exemptions, and career track changes.
-- **Structured Feedback & Rating**: Provide star ratings, evaluation comments, and actionable milestone goals.
-- **Advisor Notes**: Maintain confidential or shared academic and placement guidance notes.
 
-### 3. 🎯 AI Career Discovery & Roadmaps
-- **Custom Milestone Generation**: Generates 9-month actionable career roadmaps tailored to student background, skills, and target roles.
-- **Task Tracking**: Interactive checklist with recommended learning resources and resume bullet suggestions.
+- **Student Progress Tracker**: Allows faculty members to view student readiness, academic information, career goals, roadmap progress, projects, and skills.
+- **Career Endorsements**: Faculty mentors can provide career recommendations and academic guidance.
+- **Approvals & Guidance**: Supports roadmap reviews, career-track guidance, academic approvals, and internship-related guidance.
+- **Structured Feedback & Evaluation**: Provides ratings, evaluation comments, milestone goals, and actionable feedback.
+- **Advisor Notes**: Supports academic and career guidance notes for mentor-student interactions.
+- **Role-Based Access**: Faculty access is protected using Firebase authentication and role-based authorization.
 
-### 4. 🔬 Skill Gap Analysis Engine
-- **Skill Delta Matrix**: Visual comparisons between current competencies and target role prerequisites.
-- **Actionable Bridge Plans**: Targeted project ideas and learning modules to bridge skill gaps rapidly.
+> **Note:** Some faculty and student information is seeded/sample data intended for application demonstration.
 
-### 5. 📄 Resume Analyzer & 🎙️ Interactive Interview Prep
-- **AI Resume Audit**: Scoring resume impact, keyword alignment, formatting, and industry fit.
-- **AI Mock Technical Interviewer**: Question-and-answer simulation with instant scoring, feedback, and sample responses.
+### 3. 🎯 AI Career Assessment & Discovery
 
-### 6. 🔐 Firebase Auth & Cloud Firestore
-- Multi-user authentication (Google OAuth & Email/Password) with serverless Firestore database persistence.
+- **Interactive Career Assessment**: Collects information about student skills, interests, academic background, projects, experience, career preferences, and goals.
+- **AI Career Recommendations**: Generates personalized career recommendations based on the student's profile.
+- **Career Match Analysis**: Provides career match scores and supporting factors.
+- **Career Insights**: Explains why specific career paths may be relevant to the student's profile.
+- **Development Recommendations**: Identifies skills and areas that students can improve.
+
+### 4. 🗺️ Personalized Career Roadmap
+
+- **AI Roadmap Generation**: Generates personalized career-development roadmaps based on the student's profile and target career.
+- **Milestone-Based Planning**: Breaks career preparation into structured milestones.
+- **Task Tracking**: Provides actionable learning and development tasks.
+- **Learning Resources**: Recommends resources relevant to the student's career path.
+- **Project Recommendations**: Suggests projects that can help students develop required skills.
+- **Resume Bullet Suggestions**: Provides suggestions for converting project work into stronger resume points.
+- **Progress Tracking**: Allows students to monitor their roadmap development.
+
+### 5. 🔬 Skill Gap Analysis Engine
+
+- **Skill Delta Analysis**: Compares the student's current skills with skills required for a target career.
+- **Current Skill Identification**: Identifies skills already possessed by the student.
+- **Required Skill Identification**: Determines skills associated with the selected career.
+- **Gap Detection**: Highlights missing or underdeveloped skills.
+- **Actionable Bridge Plans**: Recommends learning activities, projects, and development tasks to address identified gaps.
+- **Career-Specific Guidance**: Connects skill gaps directly with the student's target career.
+
+### 6. 📄 AI Resume Analyzer
+
+- **AI Resume Audit**: Analyzes resume content and provides an overall resume score.
+- **ATS Analysis**: Provides an ATS-oriented score and keyword analysis.
+- **Resume Strengths**: Identifies strong areas of the resume.
+- **Improvement Suggestions**: Highlights areas that can be improved.
+- **Skills Analysis**: Extracts and analyzes technical skills, frameworks, and tools.
+- **Industry Alignment**: Evaluates the relevance of resume content to the target career.
+- **PDF Resume Upload**: Supports PDF resume processing through the backend.
+- **Resume Bullet Enhancement**: Generates improved versions of resume bullet points.
+
+### 7. 🎙️ AI Mock Interview
+
+- **Technical Interview Simulation**: Provides an interactive technical interview experience.
+- **Question & Answer Interaction**: Students can answer AI-generated interview questions.
+- **Response Evaluation**: Evaluates student responses.
+- **Performance Scoring**: Provides scores based on interview performance.
+- **Instant Feedback**: Identifies strengths and areas for improvement.
+- **Sample Responses**: Provides improved or sample answers for learning.
+- **Interview Preparation**: Helps students practice before technical interviews.
+
+### 8. 🤖 Google Gemini AI Integration
+
+- **Google Gen AI SDK**: Uses the `@google/genai` SDK for AI functionality.
+- **AI Career Recommendations**: Generates personalized career insights.
+- **AI Roadmap Generation**: Produces career-development plans.
+- **AI Skill Analysis**: Supports skill-gap analysis.
+- **AI Resume Analysis**: Processes resume information and generates feedback.
+- **AI Interview Assistance**: Supports interactive interview preparation.
+- **Server-Side API Integration**: Gemini API access is handled through the backend.
+
+### 9. 🔐 Firebase Authentication
+
+- **Email & Password Authentication**
+- **Google OAuth Authentication**
+- **Email Verification**
+- **Password Reset**
+- **Persistent Authentication Sessions**
+- **Role-Aware Authentication**
+- **Firebase ID Token Verification**
+
+### 10. 🗄️ Cloud Firestore
+
+- **User Profile Storage**
+- **Career Assessment Data**
+- **Career Strategies**
+- **Roadmap Information**
+- **Student Information**
+- **Faculty Information**
+- **Application-Specific Records**
+- **Persistent Cloud Data Storage**
+
+### 11. 🛡️ Role-Based Security
+
+- **Firebase ID Token Verification**
+- **Firebase Custom Claims**
+- **Backend Authorization Middleware**
+- **Faculty Role Verification**
+- **Protected API Routes**
+- **Request Validation**
+- **Rate Limiting**
+- **Payload Size Restrictions**
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 🏗️ System Architecture
 
-- **Frontend Framework**: React 18 with TypeScript & Vite
-- **Styling**: Tailwind CSS with custom dark/neon gradient accents
-- **Data Visualizations**: Recharts (Bar Charts, Area Trajectory, Pie Distributions, Radar Charts)
-- **Icons**: Lucide React
-- **Backend & APIs**: Express server with Vite middleware integration
-- **AI Engine**: Google Gen AI SDK (`@google/genai`) using Gemini models
-- **Database & Auth**: Firebase Firestore & Firebase Auth
+```text
+                    ┌──────────────────────┐
+                    │       STUDENT        │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+              ┌─────────────────────────────┐
+              │   React + TypeScript + Vite │
+              │          FRONTEND           │
+              │                             │
+              │ • Career Assessment         │
+              │ • Recommendations            │
+              │ • Career Roadmap             │
+              │ • Skill Gap Analysis         │
+              │ • Resume Analyzer            │
+              │ • Interview Preparation     │
+              │ • Job Market Dashboard      │
+              └──────────────┬──────────────┘
+                             │
+                             ▼
+                  ┌────────────────────┐
+                  │    Express.js      │
+                  │    BACKEND API     │
+                  └─────────┬──────────┘
+                            │
+                 ┌──────────┴──────────┐
+                 │                     │
+                 ▼                     ▼
+        ┌─────────────────┐   ┌─────────────────┐
+        │   Google Gemini │   │    Firebase     │
+        │    AI Engine    │   │                 │
+        │                 │   │ • Authentication│
+        │ • Recommendations│  │ • Firestore     │
+        │ • Roadmaps      │   │ • Custom Claims │
+        │ • Resume        │   │                 │
+        │ • Interview     │   └─────────────────┘
+        └─────────────────┘
 
----
+🚀 Getting Started
+📌 Prerequisites
+Node.js v18.x or higher
+npm v9.x or higher
+📥 Installation
+1. Clone the repository
+git clone https://github.com/JosnaJose7/CareerCompass-AI.git
+cd CareerCompass-AI
+2. Install dependencies
+npm install
+3. Configure Environment Variables
 
-## 🚀 Getting Started
+Create a .env file in the project root:
 
-### Prerequisites
-- **Node.js**: v18.x or higher
-- **npm**: v9.x or higher
+GEMINI_API_KEY=your_google_gemini_api_key_here
 
-### Installation
+⚠️ Never commit private API keys, passwords, or service-account credentials to GitHub.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/career-compass-ai.git
-   cd career-compass-ai
-   ```
+4. Start the Development Server
+npm run dev
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+Open the local development URL provided by Vite.
 
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory (or update `.env.example`):
-   ```env
-   GEMINI_API_KEY=your_google_gemini_api_key_here
-   ```
-
-4. **Start the Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Open your browser at `http://localhost:3000`.
-
----
-
-## 📦 Building for Production
-
-To build the application for deployment:
-
-```bash
+📦 Production Build
+Build the Application
 npm run build
-```
-
-To run the compiled CommonJS production bundle:
-
-```bash
+Start the Production Server
 npm start
-```
+🔒 Security
 
----
+CareerCompass AI implements multiple security mechanisms:
 
-## 📤 How to Export to GitHub
+Firebase Authentication
+Firebase ID Token Verification
+Firebase Custom Claims
+Backend Authorization Middleware
+API Request Validation
+AI API Rate Limiting
+Restricted Request Payload Sizes
+Server-Side Gemini API Access
+Environment-Based Secret Configuration
+🎯 Project Objectives
+🎓 Help students identify suitable career paths.
+🔬 Identify skill gaps between students and target careers.
+🗺️ Generate personalized career-development roadmaps.
+📄 Improve resume quality using AI-assisted analysis.
+🎙️ Provide interactive technical interview preparation.
+📊 Visualize structured job-market and technology trends.
+👨‍🏫 Enable faculty members to monitor and mentor students.
+📈 Connect academic progress with career readiness.
+🤖 Use AI to provide personalized career-development guidance.
+🔮 Future Enhancements
+🌐 Integration with live job-market APIs
+💼 Real-time job listings
+🎯 Automated job matching
+📡 Integration with external labor-market datasets
+📊 Advanced faculty analytics
+📄 Deeper resume-to-job matching
+🎙️ Advanced interview evaluation
+📚 Personalized learning-resource recommendations
+🔔 Notifications and reminders
+📈 Advanced career trend analysis
+📜 License
 
-To export or push this project to your GitHub account from AI Studio:
+This project is licensed under the MIT License.
 
-1. Click the **Settings (⚙️) / Options menu** at the top right corner of the AI Studio interface.
-2. Select **Export to GitHub** (or **Export ZIP** to download locally).
-3. Connect your GitHub account and specify your repository name to complete the export.
+See the LICENSE file for more information.
 
----
+👩‍💻 Author
 
-## 📜 License
+Josna Jose
 
-This project is licensed under the [MIT License](LICENSE).
+CareerCompass AI
+
+B.Tech — Computer Science & Engineering
+Artificial Intelligence & Machine Learning
