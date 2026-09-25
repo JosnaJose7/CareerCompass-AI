@@ -161,80 +161,126 @@ It combines **Google Gemini**, **React**, **TypeScript**, **Tailwind CSS**, **Ex
         │ • Resume        │   │                 │
         │ • Interview     │   └─────────────────┘
         └─────────────────┘
+```
 
-🚀 Getting Started
-📌 Prerequisites
-Node.js v18.x or higher
-npm v9.x or higher
-📥 Installation
-1. Clone the repository
+---
+
+#### 🚀 Getting Started
+
+#### 📌 Prerequisites
+
+- **Node.js** v18.x or higher
+- **npm** v9.x or higher
+
+### 📥 Installation
+
+#### 1. Clone the Repository
+
+```bash
 git clone https://github.com/JosnaJose7/CareerCompass-AI.git
 cd CareerCompass-AI
-2. Install dependencies
+```
+
+#### 2. Install Dependencies
+
+```bash
 npm install
-3. Configure Environment Variables
+```
 
-Create a .env file in the project root:
+#### 3. Configure Environment Variables
 
+Create a `.env` file in the project root:
+
+```env
 GEMINI_API_KEY=your_google_gemini_api_key_here
+```
 
-⚠️ Never commit private API keys, passwords, or service-account credentials to GitHub.
+> ⚠️ **Security Warning:** Never commit private API keys, passwords, or service-account credentials to GitHub.
 
-4. Start the Development Server
+#### 4. Start the Development Server
+
+```bash
 npm run dev
+```
 
-Open the local development URL provided by Vite.
+Open the local development URL provided by Vite in your browser.
 
-📦 Production Build
-Build the Application
+---
+
+## 📦 Production Build
+
+### 🔨 Build the Application
+
+```bash
 npm run build
-Start the Production Server
+```
+
+### ▶️ Start the Production Server
+
+```bash
 npm start
-🔒 Security
+```
 
-CareerCompass AI implements multiple security mechanisms:
+---
 
-Firebase Authentication
-Firebase ID Token Verification
-Firebase Custom Claims
-Backend Authorization Middleware
-API Request Validation
-AI API Rate Limiting
-Restricted Request Payload Sizes
-Server-Side Gemini API Access
-Environment-Based Secret Configuration
-🎯 Project Objectives
-🎓 Help students identify suitable career paths.
-🔬 Identify skill gaps between students and target careers.
-🗺️ Generate personalized career-development roadmaps.
-📄 Improve resume quality using AI-assisted analysis.
-🎙️ Provide interactive technical interview preparation.
-📊 Visualize structured job-market and technology trends.
-👨‍🏫 Enable faculty members to monitor and mentor students.
-📈 Connect academic progress with career readiness.
-🤖 Use AI to provide personalized career-development guidance.
-🔮 Future Enhancements
-🌐 Integration with live job-market APIs
-💼 Real-time job listings
-🎯 Automated job matching
-📡 Integration with external labor-market datasets
-📊 Advanced faculty analytics
-📄 Deeper resume-to-job matching
-🎙️ Advanced interview evaluation
-📚 Personalized learning-resource recommendations
-🔔 Notifications and reminders
-📈 Advanced career trend analysis
-📜 License
+## 🔒 Security
 
-This project is licensed under the MIT License.
+CareerCompass AI implements multiple security mechanisms to protect application data and API access:
 
-See the LICENSE file for more information.
+- 🔐 **Firebase Authentication**
+- 🪪 **Firebase ID Token Verification**
+- 🛡️ **Firebase Custom Claims**
+- 👤 **Backend Authorization Middleware**
+- ✅ **API Request Validation**
+- 🚦 **AI API Rate Limiting**
+- 📦 **Restricted Request Payload Sizes**
+- 🤖 **Server-Side Gemini API Access**
+- 🔑 **Environment-Based Secret Configuration**
 
-👩‍💻 Author
+---
 
-Josna Jose
+## 🎯 Project Objectives
 
-CareerCompass AI
+- 🎓 Help students identify suitable career paths.
+- 🔬 Identify skill gaps between students and target careers.
+- 🗺️ Generate personalized career-development roadmaps.
+- 📄 Improve resume quality using AI-assisted analysis.
+- 🎙️ Provide interactive technical interview preparation.
+- 📊 Visualize structured job-market and technology trends.
+- 👨‍🏫 Enable faculty members to monitor and mentor students.
+- 📈 Connect academic progress with career readiness.
+- 🤖 Use AI to provide personalized career-development guidance.
 
-B.Tech — Computer Science & Engineering
+---
+
+## 🔮 Future Enhancements
+
+- 🌐 Integration with live job-market APIs
+- 💼 Real-time job listings
+- 🎯 Automated job matching
+- 📡 Integration with external labor-market datasets
+- 📊 Advanced faculty analytics
+- 📄 Deeper resume-to-job matching
+- 🎙️ Advanced interview evaluation
+- 📚 Personalized learning-resource recommendations
+- 🔔 Notifications and reminders
+- 📈 Advanced career trend analysis
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License**.
+
+See the [`LICENSE`](LICENSE) file for more information.
+
+---
+
+## 👩‍💻 Author
+
+**Josna Jose**
+
+**CareerCompass AI**
+
+B.Tech — Computer Science & Engineering  
 Artificial Intelligence & Machine Learning
