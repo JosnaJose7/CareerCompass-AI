@@ -68,11 +68,15 @@ export const JobMarketDashboard: React.FC<JobMarketDashboardProps> = ({
     setCustomSectorInput('');
   };
 
-  const salaryChartData = marketData.trendingCareers?.slice(0, 5).map(c => ({
-    name: c.title.split(' ')[0] + ' ' + (c.title.split(' ')[1] || ''),
-    entry: parseInt(c.salaryEntry?.replace(/[^0-9]/g, '') || '90'),
-    experienced: parseInt(c.salaryExperienced?.replace(/[^0-9]/g, '') || '160')
-  })) || [];
+  const formatSalary = (salary: number) =>
+    `$${Math.round(salary / 1000)}k`;
+
+  const salaryChartData =
+    marketData.popularCareers?.slice(0, 5).map(c => ({
+      name: c.role.split(' ').slice(0, 2).join(' '),
+      entry: Math.round(c.entrySalary / 1000),
+      experienced: Math.round(c.seniorSalary / 1000)
+    })) || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
@@ -147,11 +151,11 @@ export const JobMarketDashboard: React.FC<JobMarketDashboardProps> = ({
             {marketData.topHiringSkills?.slice(0, 6).map((skill, idx) => (
               <div key={idx} className="space-y-1.5">
                 <div className="flex justify-between text-slate-200">
-                  <span className="font-medium text-white"><span className="text-indigo-400 font-mono">0{idx + 1}.</span> {skill.name}</span>
-                  <span className="text-indigo-400 font-mono">{skill.demandPercent}% Demand</span>
+                  <span className="font-medium text-white"><span className="text-indigo-400 font-mono">0{idx + 1}.</span> {skill.skill}</span>
+                  <span className="text-indigo-400 font-mono">{skill.demandPercentage}% Demand</span>
                 </div>
                 <div className="w-full bg-white/[0.06] h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-indigo-500 h-full rounded-full transition-all" style={{ width: `${skill.demandPercent}%` }} />
+                  <div className="bg-indigo-500 h-full rounded-full transition-all" style={{ width: `${skill.demandPercentage}%` }} />
                 </div>
               </div>
             ))}
@@ -165,18 +169,18 @@ export const JobMarketDashboard: React.FC<JobMarketDashboardProps> = ({
           </h2>
 
           <div className="space-y-2.5 text-xs">
-            {marketData.trendingCareers?.slice(0, 4).map((career, idx) => (
+            {marketData.popularCareers?.slice(0, 4).map((career, idx) => (
               <div key={idx} className="p-3 rounded-lg bg-[#0E111B] border border-white/[0.06] space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-white">{career.title}</span>
-                  <span className="text-[11px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{career.growthRate}</span>
+                  <span className="font-semibold text-white">{career.role}</span>
+                  <span className="text-[11px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{career.futureGrowthRate}</span>
                 </div>
                 <div className="flex justify-between items-center text-slate-400 pt-1 text-[11px]">
-                  <span>{career.salaryEntry} - {career.salaryExperienced}</span>
+                  <span>{formatSalary(career.entrySalary)} - {formatSalary(career.seniorSalary)}</span>
                   {onSelectRoleForRoadmap && (
                     <button
                       type="button"
-                      onClick={() => onSelectRoleForRoadmap(career.title)}
+                      onClick={() => onSelectRoleForRoadmap(career.role)}
                       className="font-medium text-indigo-400 hover:text-indigo-300 cursor-pointer flex items-center gap-1 transition-colors"
                     >
                       <span>Roadmap</span>

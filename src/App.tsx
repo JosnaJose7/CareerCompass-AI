@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   onAuthStateChanged, 
   auth, 
@@ -297,6 +297,17 @@ function AppContent() {
       handleAnalyzeSkillGap(profile.dreamRole || 'AI / Machine Learning Engineer');
     }
   }, []);
+
+  // Auto-Generate Interview Questions when Interview Preparation page is opened with an empty question bank
+  const interviewGeneratingRef = useRef(false);
+  useEffect(() => {
+    if (activeTab === 'interview' && interviewQuestions.length === 0 && !isGeneratingInterview && !interviewGeneratingRef.current) {
+      interviewGeneratingRef.current = true;
+      handleGenerateInterview(targetInterviewRole || 'Full-Stack Software Engineer').finally(() => {
+        interviewGeneratingRef.current = false;
+      });
+    }
+  }, [activeTab, interviewQuestions.length, isGeneratingInterview, targetInterviewRole]);
 
   // 1. Generate Career Recommendations
   const handleGenerateRecommendations = async () => {
